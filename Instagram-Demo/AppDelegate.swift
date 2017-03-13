@@ -29,6 +29,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 configuration.server = "http://brass-tango-8080.herokuapp.com/parse"
             })
         )
+        
+        // check if user is logged in.
+        if PFUser.current() != nil {
+            print("There is a current user")
+            
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewController(withIdentifier: "InstaFeedNavigationController")
+            
+            window?.rootViewController = vc
+        }
+        
+        
         return true
     }
 

@@ -9,46 +9,129 @@
 import UIKit
 import Parse
 
-class LoginViewController: UIViewController {
+class LoginViewController: UIViewController, UITextFieldDelegate {
     
-    @IBOutlet weak var usernameField: UITextField!
-    @IBOutlet weak var passwordField: UITextField!
     
+    @IBOutlet weak var emailTxtField: UITextField!
+    @IBOutlet weak var passwordTxtField: UITextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        emailTxtField.delegate = self
+        passwordTxtField.delegate = self
     }
     
-    @IBAction func onSignIn(_ sender: Any) {
-        PFUser.logInWithUsername(inBackground: usernameField.text!, password: passwordField.text!) { (user: PFUser?, error: Error?) in
-            
-            if user != nil{
-                print("logged in")
-                self.performSegue(withIdentifier: "logInSegue", sender: nil)
-            }
-            
-        }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
     
+    @IBAction func onTap(_ sender: Any) {
+        view.endEditing(true)
+    }
+    
+   
     @IBAction func onSignUp(_ sender: Any) {
-        let user = PFUser()
-        user.username = usernameField.text
-        user.password = passwordField.text
+        let email = emailTxtField.text
         
+        let regex = try! NSRegularExpression(pattern: "([a-z]{2,})@([a-z]+)\\.com", options: [])
+        let match = regex.matches(in: email!, options: [], range: NSRange(location: 0, length: emailTxtField?.text?.characters.count ?? 0))
         
-        user.signUpInBackground { (success: Bool, error: Error?) in
-            if success {
-                print("yay, created user")
-                self.performSegue(withIdentifier: "logInSegue", sender: nil)
+        if  match.count != 0 {
+            
+            let username = emailTxtField.text
+            let password = passwordTxtField.text
+            
+            if password != nil {
+                
+                let user = PFUser()
+                
+                
+                
+                user.username = username
+                user.password = password
+                user.email = username
+                
+                user.signUpInBackground(block: { (success: Bool, error: Error?) in
+                    if success {
+                        let alert = UIAlertController(title: "Yay!😊", message: "You successfully signed up to Instagram!", preferredStyle: .alert)
+                        // create an OK action
+                        let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
+                            self.performSegue(withIdentifier: "logInSegue", sender: nil)
+                        }
+                        // add the OK action to the alert controller
+                        alert.addAction(OKAction)
+                        self.present(alert, animated: true) {
+                            
+                        }
+                    }
+                    else{
+                        
+                        
+                        let alert = UIAlertController(title: "Opps!", message: "\(error!.localizedDescription)", preferredStyle: .alert)
+                        // create an OK action
+                        let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
+                            
+                        }
+                        // add the OK action to the alert controller
+                        alert.addAction(OKAction)
+                        self.present(alert, animated: true) {
+                            
+                        }
+                    }
+                })
             }
-            else{
-                print("\(error?.localizedDescription)")
+            else {
+                let alert = UIAlertController(title: "Invalid", message: "Please enter a non-empty password", preferredStyle: .alert)
+                // create an OK action
+                let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
+                    self.passwordTxtField.isHighlighted = true
+                }
+                // add the OK action to the alert controller
+                alert.addAction(OKAction)
+                present(alert, animated: true) {
+                    
+                }
+            }
+        }
+        else{
+            let alert = UIAlertController(title: "Invalid", message: "Please enter a vaild email address", preferredStyle: .alert)
+            // create an OK action
+            let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
+                self.emailTxtField.text = ""
+                self.passwordTxtField.isHighlighted = true
+            }
+            // add the OK action to the alert controller
+            alert.addAction(OKAction)
+            present(alert, animated: true) {
                 
             }
         }
     }
-    
+        
+    @IBAction func onLogin(_ sender: Any) {
+        let userName = emailTxtField.text
+        let password = passwordTxtField.text
+        
+        PFUser.logInWithUsername(inBackground: userName!, password: password!) { (success: PFUser?, error: Error?) in
+            if success != nil {
+                self.performSegue(withIdentifier: "logInSegue", sender: nil)
+            }
+            else {
+                let alert = UIAlertController(title: "Opps!", message: "\(error!.localizedDescription)", preferredStyle: .alert)
+                // create an OK action
+                let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
+                    
+                }
+                // add the OK action to the alert controller
+                alert.addAction(OKAction)
+                self.present(alert, animated: true) {
+                    
+                }
+            }
+        }
+    }
     
     
     override func didReceiveMemoryWarning() {
