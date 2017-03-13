@@ -17,6 +17,34 @@ class InstaFeedViewController: UIViewController, UIImagePickerControllerDelegate
     //Private Variables
     private var messages: [PFObject]? = []
     
+    
+    func getPosts(){
+        // construct PFQuery
+        let query = PFQuery(className: "Post")
+        query.order(byDescending: "createdAt")
+        query.includeKey("author")
+        query.limit = 20
+        
+        // fetch data asynchronously
+        query.findObjectsInBackground { (posts: [PFObject]?, error: Error?) -> Void in
+            if let posts = posts {
+                self.messages = posts
+                self.tableView.reloadData()
+            } else {
+                let alert = UIAlertController(title: "Ugh!", message: "\(error!.localizedDescription)", preferredStyle: .alert)
+                // create an OK action
+                let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
+                    
+                }
+                // add the OK action to the alert controller
+                alert.addAction(OKAction)
+                self.present(alert, animated: true) {
+                    
+                }
+            }
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -134,7 +162,7 @@ class InstaFeedViewController: UIViewController, UIImagePickerControllerDelegate
         }
         alert.addAction(CancelAction)
         let OKAction = UIAlertAction(title: "OK", style: .destructive) { (action) in
-            Post.postUserImage(image: originalImage, withCaption: alert.textFields?[0].text, withCompletion: { (success: Bool, error: Error?) in
+            Post.postUserImage(image: sizedEditedImage, withCaption: alert.textFields?[0].text, withCompletion: { (success: Bool, error: Error?) in
                 if success {
                     print("user posted image!")
                     self.getPosts()
@@ -161,33 +189,7 @@ class InstaFeedViewController: UIViewController, UIImagePickerControllerDelegate
         })
     }
     
-    func getPosts(){
-        // construct PFQuery
-        let query = PFQuery(className: "Post")
-        query.order(byDescending: "createdAt")
-        query.includeKey("author")
-        query.limit = 20
-        
-        // fetch data asynchronously
-        query.findObjectsInBackground { (posts: [PFObject]?, error: Error?) -> Void in
-            if let posts = posts {
-                self.messages = posts
-            } else {
-                let alert = UIAlertController(title: "Ugh!", message: "\(error!.localizedDescription)", preferredStyle: .alert)
-                // create an OK action
-                let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
-                    
-                }
-                // add the OK action to the alert controller
-                alert.addAction(OKAction)
-                self.present(alert, animated: true) {
-                    
-                }
-            }
-        }
-        
-        
-    }
+    
     
     /*
      // MARK: - Navigation

@@ -17,8 +17,9 @@ class InstagramPostTableViewCell: UITableViewCell {
 
     var instagramPost: PFObject! {
         didSet {
-            self.photoView.file = instagramPost["image"] as? PFFile
+            self.photoView.file = instagramPost["media"] as? PFFile
             self.photoView.loadInBackground()
+            self.captionLabel.text = instagramPost["caption"] as? String
         }
     }
     
