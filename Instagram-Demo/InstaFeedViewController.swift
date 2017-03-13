@@ -101,7 +101,7 @@ class InstaFeedViewController: UIViewController, UIImagePickerControllerDelegate
         PFUser.logOutInBackground { (error: Error?) in
             if error == nil {
                 self.dismiss(animated: true, completion: {
-                    
+                    NotificationCenter.default.post(name: NSNotification.Name(rawValue: "UserDidLogout"), object: nil)
                 })
             }
             else {
